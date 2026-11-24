@@ -3,12 +3,12 @@
 本页的常驻服务和仓库内 Render Blueprint 涉及付费资源。严格零费用部署请使用[免费部署说明](FREE.md)。
 
 
-需要能管理这个私有 GitHub 仓库、一个 Railway 项目、一个 Auth0 租户以及有自定义 MCP 权限的 ChatGPT 工作区。以下操作在浏览器中即可完成。把云端生成的真实域名记作 **服务域名**；OAuth 的资源标识为该域名的 HTTPS 地址加 `/mcp`。示例配置中的 .invalid 仅为占位符。
+需要能管理自己的 GitHub fork 或源码仓库、一个 Railway 项目、一个 Auth0 租户以及有自定义 MCP 权限的 ChatGPT 工作区。以下操作在浏览器中即可完成。把云端生成的真实域名记作 **服务域名**；OAuth 的资源标识为该域名的 HTTPS 地址加 `/mcp`。示例配置中的 .invalid 仅为占位符。
 
 ## 1. Railway 与 PostgreSQL
 
 1. 登录 Railway，创建空项目，添加 PostgreSQL。确认数据库挂载持久卷。仅让服务通过私网连接数据库，关闭不需要的公共 TCP 代理。
-2. 添加 GitHub Repo 服务，授权指定私有仓库，选择 main 分支。Dockerfile 在仓库根目录。服务命名为 web，启用 GitHub 自动部署与常驻运行，关闭 Serverless/App Sleeping，先使用一个副本。
+2. 添加 GitHub Repo 服务，授权自己的仓库，选择 main 分支。Dockerfile 在仓库根目录。服务命名为 web，启用 GitHub 自动部署与常驻运行，关闭 Serverless/App Sleeping，先使用一个副本。
 3. 在 web 的 Settings → Networking 选择 Generate Domain，容器目标端口设为 3000，变量 PORT 同样设为 3000。记录生成的 HTTPS 域名。Healthcheck Path 设为 /health。首次缺少配置时容器会退出，配置好后重新部署。
 4. Variables 中创建 DATABASE_URL，选择对 PostgreSQL 服务私网 DATABASE_URL 的引用，无需复制数据库密码。设置 PUBLIC_ORIGIN 为服务的 HTTPS origin（无路径），TZ 为 Asia/Shanghai，SCHEDULER_ENABLED 为 true。完成下一节后再填 OAUTH_ISSUER、ALLOWED_SUBJECTS、WEB_CLIENT_ID。
 5. 数据库用户最少需要本库的 CONNECT 和应用 schema 的建表、读写、序列权限。专用数据库和专用角色仅限此项目。检查角色没有集群管理员、创建其他数据库或复制权限；如使用托管模板初始管理员，为应用另建角色并使用其私网连接。公网数据库连接使用提供方 CA 和 verify-full。避免复制带禁用证书验证选项的连接串。
@@ -62,4 +62,4 @@ sh scripts/restore.sh /secure-backup/fund-ledger.dump
 
 恢复脚本拒绝非空目标，并在单个事务内恢复。恢复后核对迁移数、用户数、交易行数和样本快照，再切换 DATABASE_URL。删除原库或移动生产卷需单独操作。export_portfolio 为单个用户的持仓/流水导出；数据库全量备份另含净值、迁移和调度状态。
 
-Render 可在 Dashboard → New Blueprint 连接同一私有仓库，使用 render.yaml 创建付费常驻 web 服务与持久化数据库，补齐 OAuth 和域名变量。Render 配置为备选，尚未在真实租户验收。
+Render 可在 Dashboard → New Blueprint 连接自己的仓库，使用 render.yaml 创建付费常驻 web 服务与持久化数据库，补齐 OAuth 和域名变量。Render 配置为备选，尚未在真实租户验收。
