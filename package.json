@@ -37,7 +37,9 @@
     "migrate": "node src/migrate.js",
     "sync": "node src/worker.js",
     "test": "node --test test/*.test.js",
-    "tools": "node scripts/tools.js"
+    "tools": "node scripts/tools.js",
+    "demo": "node demo/run.js",
+    "client-config": "node examples/clients/config.js"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "2.30.0",
@@ -55,6 +57,7 @@
     "node": ">=22.21"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.6.0",
     "undici": "7.30.2"
   }
 }

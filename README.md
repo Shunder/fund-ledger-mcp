@@ -12,9 +12,40 @@
 [![CI](https://github.com/Shunder/fund-ledger-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Shunder/fund-ledger-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[快速开始](#快速开始) · [部署指南](docs/DEPLOY.md) · [免费部署](docs/FREE.md) · [工具目录](docs/TOOLS.md) · [使用说明](docs/USAGE.md)
+[本地试用](#3-分钟本地试用) · [接入自己的客户端](docs/CLIENTS.md) · [上云部署](docs/DEPLOY.md) · [记账口径](docs/USAGE.md)
 
 </div>
+
+## 3 分钟本地试用
+
+用 Node.js 22.21+ 打开一个内置虚构账本，直接看持仓、XIRR 和最大回撤。首次安装需要网络；运行演示只用本机内存，无需注册账号、配置数据库或提供模型密钥。
+
+```sh
+git clone https://github.com/Shunder/fund-ledger-mcp.git
+cd fund-ledger-mcp
+npm ci --ignore-scripts
+npm run demo
+```
+
+你会看到两个平台持有的两只基金。3 月赚了 **30.60 元**，年化 XIRR 为 **20.70%**，最大回撤为 **2.65%**。4 月 1 日只有一只基金披露了净值，已知日收益为 **6.00 元**，组合日收益仍待披露。每次运行都会从虚构流水和回放净值重新计算。
+
+**想直接跟 AI 聊？** 已装 DeepSeek Harness 的访客可在同一目录运行 `dsh web --patch examples/clients/deepseek-demo.yml`。也可运行 `npm run --silent client-config` 生成通用 stdio 配置。打开客户端后问：“分析演示组合 2025 年 3 月的收益。” [DeepSeek Harness、Claude Desktop、VS Code 及远程客户端接入](docs/CLIENTS.md)
+
+## 看一次实际对话
+
+以下截图来自 DeepSeek Harness Web 的本地测试会话。Codex 通过本机测试接口给出工具调用和中文回复，Harness 实际连接本仓库的 stdio 服务。演示账户、日期和净值与上面的命令一致。
+
+**同步净值，辨认未披露的 QDII**
+
+![Harness 调用净值同步和逐日收益工具，两个平台合计赚 6 元，QDII 净值停留在前一天](docs/media/nav-disclosure.png)
+
+**用最近一个完整月解释年化收益和回撤**
+
+![三月收益 30.60 元、时间加权收益 1.61%、年化 XIRR 20.70%、最大回撤 2.65%](docs/media/march-returns.png)
+
+**核对定投，确认后再看新增份额**
+
+![预览 101.80 元定投，用户确认后查回演示钱包共 1100 份、总成本 1101.80 元](docs/media/confirm-purchase.png)
 
 ## 为什么使用基金账本？
 
@@ -63,7 +94,7 @@ flowchart LR
     MCP --> Source
 ```
 
-## 快速开始
+## 进阶部署与持久化私人账本
 
 需要 Node.js 22.21+（已测试 Node 24）、PostgreSQL，以及 HTTPS/OAuth 配置。
 
@@ -104,7 +135,7 @@ npm test       # 需要专用 TEST_DATABASE_URL 和 OpenSSL
 - /mcp：受 OAuth 保护的 Streamable HTTP MCP
 - /manage：浏览器管理页面
 
-## 36 个 MCP 工具
+## MCP 工具索引
 
 | 类别 | 代表工具 |
 | --- | --- |

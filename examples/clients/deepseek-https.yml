@@ -1,0 +1,12 @@
+# Replace the reserved placeholder with your own trusted HTTPS service.
+# Supply a short-lived OAuth access token through the Harness credential provider.
+- insert:
+    - id: fund-ledger-private
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: fund_ledger
+        transport: streamable-http
+        url: https://your-ledger.invalid/mcp
+        expandTemplates: true
+        headers:
+          Authorization: 'Bearer ${credential:FUND_LEDGER_ACCESS_TOKEN}'

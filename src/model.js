@@ -83,6 +83,9 @@ export const transaction = z
     kind: z.enum(["buy", "sell", "cash_dividend", "reinvest", "convert"]),
     status: z.enum(["pending", "confirmed"]).default("confirmed"),
     orderDay: date,
+    exDay: date
+      .optional()
+      .describe("分红除息日，省略时与到账或份额确认日 day 相同"),
     day: date.optional(),
     shares: positive.optional(),
     nav: positive.optional(),
@@ -155,6 +158,12 @@ export function snapshot(row) {
 }
 export function validateTrade(input) {
   const e = transaction.parse(input);
+  if (e.exDay)
+    requireValue(
+      ["cash_dividend", "reinvest"].includes(e.kind) &&
+        (!e.day || e.exDay <= e.day),
+      "exDay 仅用于分红，须早于或等于到账或份额确认日",
+    );
   if (e.status === "pending") {
     requireValue(e.code || e.name, "待确认流水需要代码或基金名称");
     requireValue(

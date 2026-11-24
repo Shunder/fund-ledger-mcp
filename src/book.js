@@ -3,6 +3,17 @@ import { D, requireValue, posKey } from "./model.js";
 // One confirmed conversion is an indivisible pair of end-of-day legs.
 export function legs(e) {
   if (e.status === "pending") return [];
+  if (e.kind === "cash_dividend" || e.kind === "reinvest") {
+    return [
+      {
+        ...e,
+        kind: "dividend_accrual",
+        day: e.exDay || e.day,
+        beforeSettlement: e.exDay && e.exDay < e.day,
+      },
+      e,
+    ];
+  }
   if (e.kind !== "convert") return [e];
   const proceeds = D(e.amount).minus(e.fee).toFixed();
   return [
@@ -29,6 +40,10 @@ export function empty(e) {
     shares: D(0),
     cost: D(0),
     realized: D(0),
+    receivable: D(0),
+    cashDividends: D(0),
+    reinvested: D(0),
+    reinvestedShares: D(0),
     estimated: false,
     basis: [],
     createdAt: e.createdAt,
@@ -65,14 +80,21 @@ export function apply(s, e) {
       s.realized = s.realized.plus(a).minus(basis);
       break;
     }
-    case "cash_dividend":
-    case "reinvest":
+    case "dividend_accrual":
       requireValue(s.shares.gt(0), "分红日没有确认持仓");
       s.realized = s.realized.plus(a);
-      if (e.kind === "reinvest") {
-        s.shares = s.shares.plus(q);
-        s.cost = s.cost.plus(a);
-      }
+      s.receivable = s.receivable.plus(a);
+      break;
+    case "cash_dividend":
+      s.receivable = s.receivable.minus(a);
+      s.cashDividends = s.cashDividends.plus(a);
+      break;
+    case "reinvest":
+      s.receivable = s.receivable.minus(a);
+      s.reinvested = s.reinvested.plus(a);
+      s.reinvestedShares = s.reinvestedShares.plus(q);
+      s.shares = s.shares.plus(q);
+      s.cost = s.cost.plus(a);
       break;
   }
   s.started = true;
@@ -83,7 +105,8 @@ export function ordered(events) {
     .sort(
       (a, b) =>
         a.day.localeCompare(b.day) ||
-        Number(b.kind === "opening") - Number(a.kind === "opening"),
+        Number(b.kind === "opening") - Number(a.kind === "opening") ||
+        Number(!!b.beforeSettlement) - Number(!!a.beforeSettlement),
     );
 }
 export function validateBook(events) {

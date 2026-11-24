@@ -17,6 +17,7 @@ export function poolFor(connectionString) {
   return pool;
 }
 export async function atomic(pool, fn) {
+  if (pool.transaction) return pool.transaction(fn);
   const c = await pool.connect();
   try {
     await c.query("BEGIN");

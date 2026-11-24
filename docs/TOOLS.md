@@ -13,8 +13,8 @@
 | get_holding | code，可选 day、platform → 指定基金分平台记录和合计 |
 | add_holding / update_holding | holding → 创建期初记录或生成更正预览 |
 | import_holdings | data.rows 或 data.csv → 原子导入预览 |
-| record_transaction | transaction → 已记账 ID，或幂等重放结果 |
-| get_transactions | 可选 code, offset, limit → 分页流水、总数 |
+| record_transaction | transaction，可选分红除息日 exDay → 已记账 ID，或幂等重放结果 |
+| get_transactions | 可选 platform、code、kind、status、offset、limit → 筛选后的分页流水和总数，转换支持按转入或转出代码查询 |
 | preview_portfolio_changes | operation.action 及对应参数 → 待改行、已有行、token、有效期 |
 | delete_transaction / delete_holding | id，或 platform 与 code → 删除预览 |
 | confirm_changes | token → 确认当次预览、返回受影响 ID |

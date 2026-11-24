@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Run a fictional, offline ledger over MCP stdio with `npm run demo`. Includes client configurations and recorded DeepSeek Harness Web conversations.
+- Reconcile cash and reinvested dividends by platform from the ex-dividend date through settlement, including dividend receivables, confirmed units and historical replay.
+- Filter transaction history by platform, status, transaction kind and either side of a conversion.
+
 ## 1.0.0 — Initial public version
 
 - Self-hosted MCP service using Streamable HTTP and trusted local stdio.

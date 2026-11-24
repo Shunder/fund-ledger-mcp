@@ -33,12 +33,15 @@ try {
   } else {
     const sub = process.env.STDIO_SUBJECT;
     if (!conf.allowed.includes(sub)) throw Error("CONFIG_STDIO_SUBJECT");
-    const server = mcpServer({
-      pool,
-      owner: ownerId(conf.issuer, sub),
-      origin: conf.origin,
-      scopes: ["portfolio:read", "portfolio:write"],
-    });
+    const server = mcpServer(
+      {
+        pool,
+        owner: ownerId(conf.issuer, sub),
+        origin: conf.origin,
+        scopes: ["portfolio:read", "portfolio:write"],
+      },
+      { stdio: true },
+    );
     await server.connect(new StdioServerTransport());
     process.stdin.once("end", () => pool.end());
   }

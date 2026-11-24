@@ -64,18 +64,25 @@ export function project(
     const flows = new Map(),
       openingKeys = new Set(),
       activity = new Set(),
-      dividends = new Set();
+      dividends = new Set(),
+      needsTradeNav = new Set();
     for (const e of trades.get(day) || []) {
       const k = posKey(e.platform, e.code),
         s = positions.get(k) || empty(e);
       if (e.kind === "opening") openingKeys.add(k);
-      if (["cash_dividend", "reinvest"].includes(e.kind)) dividends.add(k);
-      if (e.kind !== "opening" && latest.get(e.code)?.day !== day)
-        s.unpricedTrade = day;
+      if (e.kind === "dividend_accrual") dividends.add(k);
+      // A cash payout simply settles a receivable. It can arrive on a weekend.
+      if (e.kind !== "opening" && e.kind !== "cash_dividend") {
+        needsTradeNav.add(k);
+        if (latest.get(e.code)?.day !== day) s.unpricedTrade = day;
+      }
       const flow = external(e, latest.get(e.code)?.nav);
       const old = flows.has(k) ? flows.get(k) : D(0);
       flows.set(k, old == null || flow == null ? null : old.plus(flow));
-      if (!activity.has(k)) s.before = s.shares;
+      if (!activity.has(k)) {
+        s.before = s.shares;
+        s.priorReceivable = s.receivable;
+      }
       activity.add(k);
       apply(s, e);
       positions.set(k, s);
@@ -91,20 +98,27 @@ export function project(
         q?.day === day &&
         before.gt(0) &&
         q.action_note &&
-        (!/分红|派现|派发|派现金|分配/.test(q.action_note) || !dividends.has(k))
+        (/拆|折算|合并/.test(q.action_note) ||
+          !/分红|红利|派现|派发|每.*派|分配/.test(q.action_note) ||
+          !dividends.has(k))
       )
         s.needsReconciliation = true;
-      const value = s.needsReconciliation
+      const fundValue = s.needsReconciliation
         ? null
         : s.shares.isZero()
           ? D(0)
           : (nav?.times(s.shares) ?? null);
-      const active = before.gt(0) || s.shares.gt(0) || activity.has(k);
+      const value = fundValue?.plus(s.receivable) ?? null;
+      const priorReceivable = activity.has(k)
+        ? s.priorReceivable
+        : s.receivable;
+      const active =
+        before.gt(0) || s.shares.gt(0) || s.receivable.gt(0) || activity.has(k);
       const fresh = q?.day === day;
       const startValue = before.isZero()
-        ? D(0)
+        ? priorReceivable
         : prev
-          ? before.times(prev.nav)
+          ? before.times(prev.nav).plus(priorReceivable)
           : null;
       const flow = flows.has(k) ? flows.get(k) : D(0);
       const ready =
@@ -123,9 +137,8 @@ export function project(
         periodCovered = false;
       if (active && !covered(s.code, series.at(-1)?.day || day, day))
         periodCovered = false;
-      if (activity.has(k) && !fresh && !openingKeys.has(k))
-        periodCovered = false;
-      const unrealized = value?.minus(s.cost) ?? null;
+      if (needsTradeNav.has(k) && !fresh) periodCovered = false;
+      const unrealized = fundValue?.minus(s.cost) ?? null;
       items.push({
         platform: s.platform,
         code: s.code,
@@ -139,7 +152,13 @@ export function project(
         navDay: q?.day ?? null,
         previousNavDay: prev?.day ?? null,
         dataUpdatedAt: q?.updated_at ?? null,
-        marketValue: money(value),
+        marketValue: money(fundValue),
+        assetValue: money(value),
+        dividendReceivable: money(s.receivable),
+        cashDividendsReceived: money(s.cashDividends),
+        dividendsReinvested: money(s.reinvested),
+        reinvestedShares: s.reinvestedShares.toFixed(),
+        fundValue,
         unrealized: money(unrealized),
         realized: s.needsReconciliation ? null : money(s.realized),
         holdingReturnPct: pct(
@@ -184,6 +203,7 @@ export function project(
     const details = items.map(
       ({
         active,
+        fundValue,
         value,
         profit,
         startValue,
@@ -200,7 +220,7 @@ export function project(
       byFund.push({
         code,
         shares: sum(lines.map((i) => D(i.shares))).toFixed(),
-        marketValue: money(knownSum(lines.map((i) => i.value))),
+        marketValue: money(knownSum(lines.map((i) => i.fundValue))),
         dailyProfit: money(
           exposed.length ? knownSum(exposed.map((i) => i.profit)) : null,
         ),
@@ -223,7 +243,8 @@ export function project(
       fundCount: new Set(
         items.filter((i) => D(i.shares).gt(0)).map((i) => i.code),
       ).size,
-      marketValue: money(value),
+      marketValue: money(knownSum(items.map((i) => i.fundValue))),
+      assetValue: money(value),
       dailyProfit: money(daily),
       dailyReturnPct: pct(
         daily != null && base?.gt(0) ? daily.div(base) : null,

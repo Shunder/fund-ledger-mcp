@@ -257,15 +257,22 @@ tool(
 );
 tool(
   "get_transactions",
-  "获取流水、状态及原始输入，按登记顺序分页。",
+  "获取流水、状态及原始输入，按登记顺序分页，可按平台、交易类型、状态及基金筛选。",
   {
     offset: z.number().int().min(0).default(0),
     limit: z.number().int().min(1).max(200).default(100),
     code: code.optional(),
+    platform: label.optional(),
+    kind: z.enum(["opening", ...transaction.shape.kind.options]).optional(),
+    status: transaction.shape.status.unwrap().optional(),
   },
   async (c, a) => {
     const all = (await eventsFor(c.pool, c.owner)).filter(
-      (e) => !a.code || e.code === a.code || e.targetCode === a.code,
+      (e) =>
+        (!a.code || e.code === a.code || e.targetCode === a.code) &&
+        (!a.platform || e.platform === a.platform) &&
+        (!a.kind || e.kind === a.kind) &&
+        (!a.status || e.status === a.status),
     );
     return {
       total: all.length,
@@ -404,7 +411,7 @@ tool(
   { start: date.optional(), end: date.optional() },
   (c, a) => {
     if (a.start) checkRange(a.start, a.end || today());
-    return refresh(c.pool, c.owner, a);
+    return refresh(c.pool, c.owner, a, c.navSource);
   },
   { write: true, open: true },
 );
@@ -478,18 +485,26 @@ export function publicError(e) {
     };
   return { code: "UNAVAILABLE", message: "服务或数据源暂不可用，请稍后重试。" };
 }
-export function mcpServer(ctx) {
-  const server = new McpServer({
-    name: "fund-ledger-mcp",
-    title: "基金账本",
-    version: "1.0.0",
-  });
-  for (const t of tools) {
+export function mcpServer(
+  ctx,
+  { enabledTools = tools, instructions, stdio = false } = {},
+) {
+  const server = new McpServer(
+    {
+      name: "fund-ledger-mcp",
+      title: "基金账本",
+      version: "1.0.0",
+    },
+    { instructions },
+  );
+  for (const t of enabledTools) {
     const scope = t.write ? "portfolio:write" : "portfolio:read";
     const requiredScopes = t.write
       ? ["portfolio:read", "portfolio:write"]
       : ["portfolio:read"];
-    const schemes = [{ type: "oauth2", scopes: requiredScopes }];
+    const schemes = stdio
+      ? [{ type: "noauth" }]
+      : [{ type: "oauth2", scopes: requiredScopes }];
     server.registerTool(
       t.name,
       {

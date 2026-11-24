@@ -1,0 +1,11 @@
+# From the repository root: dsh web --patch examples/clients/deepseek-demo.yml
+- insert:
+    - id: fund-ledger-demo
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: fund_ledger
+        transport: stdio
+        command: !!js process.execPath
+        args:
+          - !!js process.getBuiltinModule('node:path').resolve('demo/server.js')
+        failOnStartupError: true
