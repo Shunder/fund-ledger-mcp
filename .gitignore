@@ -10,3 +10,18 @@ exports/
 *.pem
 *.key
 coverage/
+
+# Local databases, credentials and private ledger exports
+*.sqlite
+*.sqlite3
+*.db
+*.p12
+*.pfx
+*.log
+*.dump.gz
+credentials.json
+secrets.json
+export*.json
+portfolio*.json
+holdings*.json
+transactions*.json
