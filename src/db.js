@@ -5,13 +5,16 @@ pg.types.setTypeParser(1082, (value) => value);
 export function poolFor(connectionString) {
   if (!connectionString || !/^postgres(ql)?:\/\//.test(connectionString))
     throw Error("DATABASE_URL must be PostgreSQL");
-  return new pg.Pool({
+  const pool = new pg.Pool({
     connectionString,
     max: 10,
     connectionTimeoutMillis: 5000,
     statement_timeout: 30000,
     idle_in_transaction_session_timeout: 120000,
   });
+  // pg discards disconnected idle clients. Keep the HTTP process alive for the next checkout.
+  pool.on("error", () => console.error("database connection interrupted"));
+  return pool;
 }
 export async function atomic(pool, fn) {
   const c = await pool.connect();
