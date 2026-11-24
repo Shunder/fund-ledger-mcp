@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Railway Free | 一个可休眠的 Web 服务 | 每月 1 美元资源抵扣，用完暂停。Free 不提供常驻实例和平台 cron。过期试用需先在工作区选择 Free。 |
 | Neon Free | 一个 PostgreSQL 数据库 | 免费额度内持久化，空闲时计算休眠。数据库与 Web 可独立唤醒。 |
-| GitHub Actions | 私有仓库的标准 Linux runner | 定时任务可能延迟。免费分钟与账号其他仓库共享，调度默认为关闭。 |
+| GitHub Actions | 标准 Linux runner（公开与私有仓库的额度规则不同） | 定时任务可能延迟。免费分钟与账号其他仓库共享，调度默认为关闭。 |
 | Auth0 | Free 租户，Web 与 SPA 客户端 | 单人登录按免费套餐的可用功能配置。 |
 | ChatGPT | 使用账号已有的自定义 MCP 权限 | 服务器免费与 ChatGPT 套餐分开。Pro 读工具、完整读写等权限取决于工作区。 |
 
@@ -14,7 +14,7 @@
 
 ## 网页设置
 
-1. Railway 工作区选择 **Free**。如果旧工作区试用到期且无法选择 Free，先停在套餐页面。创建项目 fund-ledger-mcp，或在有剩余名额且成员可信的现有项目中单独添加服务。将该 Web 服务连接到本仓库的 main 分支，使用 Dockerfile、3000 端口和 /health。允许休眠，设置 SCHEDULER_ENABLED=false。避免高频外部保活。
+1. Railway 工作区选择 **Free**。如果旧工作区试用到期且无法选择 Free，先停在套餐页面。创建项目 fund-ledger-mcp，或在有剩余名额且成员可信的现有项目中单独添加服务。将该 Web 服务连接到自己的 fork 或源码仓库的 main 分支，使用 Dockerfile、3000 端口和 /health。允许休眠，设置 SCHEDULER_ENABLED=false。避免高频外部保活。
 2. 在 Neon 建立 Free 项目。使用直连 PostgreSQL 字符串（主机名不含 -pooler），启用 TLS 并校验证书，可使用 sslmode=verify-full。这个项目用 PostgreSQL 会话级 advisory lock 调度，事务池模式不适用。将连接串存入 Railway 的 DATABASE_URL，使用独立数据库，避免在聊天或 Git 中传递凭据。
 3. 生成 Railway 服务域名。按[部署指南的 Auth0 和 ChatGPT 章节](DEPLOY.md)填写 OAuth issuer、用户白名单、浏览器 client ID 和对外 origin。使用实际 HTTPS 域名加 /mcp 注册资源。部署后检查 /health、匿名 /mcp 的 401、真实 OAuth 登录，以及休眠后第一次工具发现能否成功。若首次请求超时，唤醒后重试。
 4. 在 GitHub 账户 Billing 确认标准 Linux runner 的剩余免费额度。有支付方式时，为 Actions 配置阻止额外用量的零付费预算，并启用 **Stop usage when budget limit is reached**；如果账户无法限制超额扣费，保持自动任务关闭。在仓库 Settings → Secrets and variables → Actions，将同一数据库直连串保存为 Secret FUND_SYNC_DATABASE_URL，再新建仓库 Variable ENABLE_FREE_SYNC=true。仅在可信的默认分支运行。
