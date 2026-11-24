@@ -1,5 +1,8 @@
 # 网页端部署与接入
 
+本页的常驻服务和仓库内 Render Blueprint 涉及付费资源。严格零费用部署请使用[免费部署说明](FREE.md)。
+
+
 需要能管理这个私有 GitHub 仓库、一个 Railway 项目、一个 Auth0 租户以及有自定义 MCP 权限的 ChatGPT 工作区。以下操作在浏览器中即可完成。把云端生成的真实域名记作 **服务域名**；OAuth 的资源标识为该域名的 HTTPS 地址加 `/mcp`。示例配置中的 .invalid 仅为占位符。
 
 ## 1. Railway 与 PostgreSQL

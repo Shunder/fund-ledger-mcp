@@ -1,0 +1,27 @@
+name: Sync disclosed fund NAVs
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC. Shanghai 08:10, 21:10, 23:10.
+    - cron: '10 0,13,15 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: fund-ledger-nav-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: ${{ vars.ENABLE_FREE_SYNC == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --omit=dev --ignore-scripts
+      - name: Refresh NAVs and save daily snapshots
+        run: npm run sync
+        env:
+          DATABASE_URL: ${{ secrets.FUND_SYNC_DATABASE_URL }}
+          TZ: Asia/Shanghai

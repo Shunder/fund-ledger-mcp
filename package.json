@@ -1,9 +1,9 @@
 {
-  "name": "personal-funds-mcp",
+  "name": "fund-ledger-mcp",
   "version": "1.0.0",
-  "description": "Personal CNY fund ledger and authenticated remote MCP server",
+  "description": "基金账本 · 个人基金持仓、交易与收益 MCP 服务",
   "author": "smallke <smallkes@qq.com> (https://github.com/smallke)",
-  "homepage": "https://github.com/smallke",
+  "homepage": "https://github.com/Shunder/fund-ledger-mcp",
   "license": "MIT",
   "keywords": [
     "mcp",
@@ -28,6 +28,7 @@
   ],
   "type": "module",
   "bin": {
+    "fund-ledger-mcp": "./src/index.js",
     "cn-funds-mcp": "./src/index.js"
   },
   "scripts": {

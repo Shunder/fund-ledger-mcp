@@ -10,7 +10,7 @@ import {
 export default defineRailway(() => {
   const db = postgres("Postgres");
   const web = service("web", {
-    source: github("Shunder/-MCP-Server", { branch: "main" }),
+    source: github("Shunder/fund-ledger-mcp", { branch: "main" }),
     start: "node src/index.js --http",
     healthcheck: "/health",
     env: {
@@ -23,5 +23,5 @@ export default defineRailway(() => {
       TZ: "Asia/Shanghai",
     },
   });
-  return project("personal-funds", { resources: [db, web] });
+  return project("fund-ledger-mcp", { resources: [db, web] });
 });

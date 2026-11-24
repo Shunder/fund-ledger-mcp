@@ -480,7 +480,8 @@ export function publicError(e) {
 }
 export function mcpServer(ctx) {
   const server = new McpServer({
-    name: "personal-funds-mcp",
+    name: "fund-ledger-mcp",
+    title: "基金账本",
     version: "1.0.0",
   });
   for (const t of tools) {
