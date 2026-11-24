@@ -1,6 +1,6 @@
 # 基金账本的零费用部署
 
-适合已有相应 ChatGPT 权限、能接受冷启动和延迟的个人用户。Web 服务、数据库与自动同步分别使用免费额度。额度耗尽时接受暂停服务；不要启用付费升级。仓库自带的常驻 Railway IaC 和 Render Blueprint 面向其他部署方式。
+适合已有相应 ChatGPT 权限、能接受冷启动和延迟的个人用户。Web 服务、数据库与自动同步分别使用免费额度。额度耗尽时接受暂停服务；不要启用付费升级。默认 Railway IaC 仅声明一个可连接外部数据库的 Web 服务，关闭进程内调度。Render Blueprint 则选择付费实例。
 
 | 服务 | 配置 | 额度与取舍 |
 | --- | --- | --- |
@@ -14,7 +14,7 @@
 
 ## 网页设置
 
-1. Railway 工作区选择 **Free**。如果旧工作区试用到期且无法选择 Free，先停在套餐页面。创建项目 fund-ledger-mcp，添加一个连接本仓库 main 分支的 Web 服务，使用 Dockerfile、3000 端口和 /health。允许休眠，设置 SCHEDULER_ENABLED=false。避免高频外部保活。
+1. Railway 工作区选择 **Free**。如果旧工作区试用到期且无法选择 Free，先停在套餐页面。创建项目 fund-ledger-mcp，或在有剩余名额且成员可信的现有项目中单独添加服务。将该 Web 服务连接到本仓库的 main 分支，使用 Dockerfile、3000 端口和 /health。允许休眠，设置 SCHEDULER_ENABLED=false。避免高频外部保活。
 2. 在 Neon 建立 Free 项目。使用直连 PostgreSQL 字符串（主机名不含 -pooler），启用 TLS 并校验证书，可使用 sslmode=verify-full。这个项目用 PostgreSQL 会话级 advisory lock 调度，事务池模式不适用。将连接串存入 Railway 的 DATABASE_URL，使用独立数据库，避免在聊天或 Git 中传递凭据。
 3. 生成 Railway 服务域名。按[部署指南的 Auth0 和 ChatGPT 章节](DEPLOY.md)填写 OAuth issuer、用户白名单、浏览器 client ID 和对外 origin。使用实际 HTTPS 域名加 /mcp 注册资源。部署后检查 /health、匿名 /mcp 的 401、真实 OAuth 登录，以及休眠后第一次工具发现能否成功。若首次请求超时，唤醒后重试。
 4. 在 GitHub 账户 Billing 确认标准 Linux runner 的剩余免费额度。有支付方式时，为 Actions 配置阻止额外用量的零付费预算，并启用 **Stop usage when budget limit is reached**；如果账户无法限制超额扣费，保持自动任务关闭。在仓库 Settings → Secrets and variables → Actions，将同一数据库直连串保存为 Secret FUND_SYNC_DATABASE_URL，再新建仓库 Variable ENABLE_FREE_SYNC=true。仅在可信的默认分支运行。

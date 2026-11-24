@@ -13,7 +13,7 @@
 4. Variables 中创建 DATABASE_URL，选择对 PostgreSQL 服务私网 DATABASE_URL 的引用，无需复制数据库密码。设置 PUBLIC_ORIGIN 为服务的 HTTPS origin（无路径），TZ 为 Asia/Shanghai，SCHEDULER_ENABLED 为 true。完成下一节后再填 OAUTH_ISSUER、ALLOWED_SUBJECTS、WEB_CLIENT_ID。
 5. 数据库用户最少需要本库的 CONNECT 和应用 schema 的建表、读写、序列权限。专用数据库和专用角色仅限此项目。检查角色没有集群管理员、创建其他数据库或复制权限；如使用托管模板初始管理员，为应用另建角色并使用其私网连接。公网数据库连接使用提供方 CA 和 verify-full。避免复制带禁用证书验证选项的连接串。
 
-仓库同时给出 Railway IaC 声明 .railway/railway.ts，适用于平台的 IaC 工作流。纯网页方式按上述设置即可，保留型环境变量需在 Railway 中填写。应用启动时迁移及调度，无须另建 cron 服务。[Railway IaC](https://docs.railway.com/infrastructure-as-code/reference) · [GitHub 自动部署](https://docs.railway.com/deployments/github-autodeploys)
+仓库的 .railway/railway.ts 默认面向免费部署，使用外部 PostgreSQL 和独立定时任务。采用本节的付费常驻方式时，在网页中手工配置数据库并启用进程内调度即可。[Railway IaC](https://docs.railway.com/infrastructure-as-code/reference) · [GitHub 自动部署](https://docs.railway.com/deployments/github-autodeploys)
 
 ## 2. Auth0 配置
 
