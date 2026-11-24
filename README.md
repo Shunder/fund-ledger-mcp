@@ -1,30 +1,147 @@
+<div align="center">
+
 # 基金账本 · Fund Ledger MCP
 
-在 ChatGPT 网页版记录已发生的人民币场外基金交易，按平台查询份额、成本和已披露净值日的收益。账本保存在 PostgreSQL，身份来自 OAuth。只读 ChatGPT 账号可在同一服务的 `/manage` 页面录入。项目没有下单接口。
+**让 AI 成为你的基金记账与投资分析助手。**
 
-**仅使用免费资源**可按[零费用部署说明](docs/FREE.md)配置休眠 Web 服务和独立净值同步。
+面向人民币场外基金的可自托管 MCP 服务 · 持久化账本 · 正式净值 · 资金流调整收益
 
-**常驻部署请从 [中文网页部署指南](docs/DEPLOY.md) 开始。** 源码内没有已上线服务的地址。不要把实际持仓、交易导出或密钥提交到仓库。
+[![MCP](https://img.shields.io/badge/MCP-Streamable_HTTP-6366f1)](https://modelcontextprotocol.io/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.21%2B-339933)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-storage-4169e1)](https://www.postgresql.org/)
+[![CI](https://github.com/Shunder/fund-ledger-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Shunder/fund-ledger-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-| 入口 | 用途 |
+[快速开始](#快速开始) · [部署指南](docs/DEPLOY.md) · [免费部署](docs/FREE.md) · [工具目录](docs/TOOLS.md) · [使用说明](docs/USAGE.md)
+
+</div>
+
+## 为什么使用基金账本？
+
+基金账本将公开基金行情与私人投资流水结合，让支持 MCP 的 AI 客户端能够跨会话查询持仓、计算收益和辅助投资复盘。数据由自己的 PostgreSQL 保存，不必每次重新向 AI 提供整份持仓。
+
+| 能力 | 说明 |
 | --- | --- |
-| [使用、记账口径和已知限制](docs/USAGE.md) | 期初导入、申赎、分红、收益率及七个自然语言场景 |
-| [工具索引](docs/TOOLS.md) · [完整参数 JSON Schema](docs/tools.json) | MCP 工具、权限、输入、输出与错误 |
-| [架构、数据模型和安全](docs/DESIGN.md) | 计算路径、事务、用户隔离、数据来源及上游对照 |
-| [部署、备份和恢复](docs/DEPLOY.md) | Railway 网页操作、Auth0、ChatGPT 接入、Render 备选与成本 |
-| [实际测试报告](docs/TESTING.md) | PostgreSQL、HTTPS 客户端、Docker、公开数据源及待上线验收项 |
+| 📚 持久化账本 | 多平台持仓、批量导入、交易流水、分红与基金转换 |
+| 📈 行情查询 | 基金档案、正式净值、历史净值、盘中估值及重仓股 |
+| 📊 投资分析 | 日/月/年收益、已实现与未实现收益、TWR、XIRR、最大回撤 |
+| 🔄 净值同步 | 上海时区调度、历史回补、披露延迟与错误状态 |
+| 🔐 身份隔离 | OAuth、用户白名单、读写权限、修改预览与确认 |
+| 🌐 多端访问 | Streamable HTTP MCP、可信本机 stdio、浏览器管理页 |
 
-## 运行
+> 本项目仅用于记账和分析，不连接银行账户，不执行实际交易，不提供收益保证。
 
-需要 Node.js 22.21+（已测试 24）、PostgreSQL 以及 [.env.example](.env.example) 所列环境变量。云端从 Secret 注入。HTTP 启动时自动执行带校验和的迁移。开发机可用 Node 的 `--env-file` 加载文件。
+## 使用场景
 
-```sh
+在已连接的 MCP 客户端中，可以直接用自然语言提问：
+
+- “列出我的基金持仓，显示市值、收益率和净值日期。”
+- “同步最新披露净值，列出每日收益和未披露的基金。”
+- “记录一笔已确认的申购，金额、份额及手续费如下。”
+- “分析最近一个月的资金流调整收益、最大回撤和资产配置。”
+
+批量导入示例（虚构演示数据，不代表任何实际账户）：
+
+```csv
+platform,code,day,shares,unitCost
+DEMO,000123,2025-01-02,100.00,1.2000
+```
+
+录入前核对平台、份额、成本与基准日期；批量修改须预览并确认。
+
+## 架构
+
+```mermaid
+flowchart LR
+    AI["AI / MCP Client"] -->|HTTPS + OAuth| MCP["MCP Server"]
+    UI["Browser /manage"] -->|Protected API| MCP
+    IDP["OAuth Provider"] -.-> MCP
+    MCP --> Ledger["Ledger & Analytics"]
+    Ledger --> DB[("PostgreSQL")]
+    Worker["NAV Scheduler"] --> Source["Public Fund Data"]
+    Worker --> DB
+    MCP --> Source
+```
+
+## 快速开始
+
+需要 Node.js 22.21+（已测试 Node 24）、PostgreSQL，以及 HTTPS/OAuth 配置。
+
+```bash
+git clone https://github.com/Shunder/fund-ledger-mcp.git
+cd fund-ledger-mcp
 npm ci --ignore-scripts
+cp .env.example .env
+# 配置自己的数据库、HTTPS origin、OAuth issuer 和用户白名单
 node --env-file=.env src/index.js --http
 ```
 
-`npm run stdio` 启动可信本机 stdio 客户端，必须额外设置 `STDIO_SUBJECT`。HTTP、stdio 与浏览器共享同一用户身份和数据库。`npm run sync` 手动运行独立批处理。`npm test` 要求专用 `TEST_DATABASE_URL` 及 OpenSSL，测试会创建并清理独立 schema。
+HTTP 启动时自动执行数据库迁移。生产环境应通过平台 Secret 注入配置，使用 HTTPS 反向代理或托管平台。不要提交 .env 或真实交易数据。
 
-## 上游与许可
+| 部署方式 | 适合场景 |
+| --- | --- |
+| [免费额度部署](docs/FREE.md) | 可接受冷启动的个人用户；Railway、Neon 与独立同步 |
+| [常驻云服务](docs/DEPLOY.md) | 持续可用、内置调度、OAuth 与 ChatGPT 接入 |
+| Docker | 自托管容器环境；仓库提供 Dockerfile |
+| stdio | 可信本机客户端；需额外设置 STDIO_SUBJECT |
 
-行情适配器源自 smallke 的 cn-funds-mcp，基线提交为 `bb44fbc653bb068f0cacd588f19aed0249bffc3d`。上游 package.json 声明 MIT，未附独立许可证文件。本项目保留作者和原说明，补充 MIT 全文。公开行情的数据权利及使用条件见上游第三方声明。[上游仓库](https://github.com/smallke/cn-funds-mcp) · [原始 README 和数据声明](docs/UPSTREAM.md) · [MIT](LICENSE)
+常用命令：
+
+```bash
+npm start       # HTTP 服务
+npm run stdio   # 本机 MCP
+npm run migrate # 数据库迁移
+npm run sync    # 独立净值同步
+npm run tools   # 生成工具参数目录
+npm test       # 需要专用 TEST_DATABASE_URL 和 OpenSSL
+```
+
+## 接入 MCP 客户端
+
+按照[部署指南](docs/DEPLOY.md)完成 Auth0 配置，将自己的 HTTPS 服务地址加上 /mcp 作为 MCP endpoint，使用 OAuth 授权。具体客户端支持的读写能力取决于其套餐、工作区和授权设置。只读客户端可通过同一服务的 /manage 页面录入。
+
+- /health：健康检查
+- /mcp：受 OAuth 保护的 Streamable HTTP MCP
+- /manage：浏览器管理页面
+
+## 36 个 MCP 工具
+
+| 类别 | 代表工具 |
+| --- | --- |
+| 基金研究 | search_funds · get_fund_info · get_fund_nav_history |
+| 持仓管理 | get_portfolio · import_holdings · update_holding |
+| 交易流水 | record_transaction · get_transactions |
+| 收益分析 | get_daily_profit · get_portfolio_summary · get_xirr · get_max_drawdown |
+| 资产配置 | get_asset_allocation |
+| 数据维护 | refresh_portfolio · get_data_status · export_portfolio |
+
+完整接口及参数见[工具索引](docs/TOOLS.md)和[JSON Schema](docs/tools.json)。
+
+## 数据准确性与隐私
+
+- 正式收益使用已披露单位净值，盘中估值单独展示。
+- QDII、休市和数据源异常可能造成净值延迟；缺失值不会被当作零。
+- 期初持仓以前的交易未知，历史绩效需要可靠的现金流记录。
+- 真实账本、密钥和数据库备份不得提交到 Git；公开示例应仅使用虚构数据。
+- 应用层按 OAuth 身份隔离账本，托管数据库管理员仍可访问数据。
+- 目前支持人民币普通单位净值场外基金，不支持外币份额、货币基金万份收益等特殊模型。
+
+## 文档
+
+| 文档 | 内容 |
+| --- | --- |
+| [使用说明](docs/USAGE.md) | 交易口径、收益算法、自然语言示例及限制 |
+| [部署指南](docs/DEPLOY.md) | 云端配置、OAuth、备份与恢复 |
+| [免费部署](docs/FREE.md) | 免费额度方案与取舍 |
+| [设计说明](docs/DESIGN.md) | 数据模型、认证及安全边界 |
+| [测试报告](docs/TESTING.md) | 已执行的测试与待验收项 |
+| [上游说明](docs/UPSTREAM.md) | 上游归属及数据来源 |
+
+## 贡献与许可
+
+欢迎提交 Issue 和 Pull Request。请使用虚构测试数据，不要在 Issue、日志或截图中附上访问令牌、数据库连接串、真实持仓或其他个人信息。安全问题请勿在公开 Issue 中披露细节。
+
+行情适配器基于 [smallke/cn-funds-mcp](https://github.com/smallke/cn-funds-mcp)，基线提交为 `bb44fbc653bb068f0cacd588f19aed0249bffc3d`。上游 package.json 声明 MIT，未附独立许可证文件；本项目保留作者与原说明，并补充 MIT 全文。行情数据权利和使用条件见[上游声明](docs/UPSTREAM.md)。
+
+本项目采用 [MIT License](LICENSE)。
+
