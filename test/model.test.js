@@ -223,3 +223,26 @@ test("provider network timeout aborts hanging response", async () => {
     await new Promise((r) => srv.close(r));
   }
 });
+test("full history from first confirmed purchase includes its initial fee and actual initial XIRR outflow", () => {
+  const initial = trade("buy", {
+    day: "2025-01-02",
+    orderDay: "2025-01-02",
+    shares: "100",
+    nav: "1",
+    amount: "101",
+    fee: "1",
+  });
+  const r = performance(calc([initial]), "2025-01-01", "2025-01-06");
+  assert.equal(r.status, "since_first_recorded_trade");
+  assert.equal(r.profit, "-2.00");
+  assert.equal(r.twrPct, D(99).div(101).minus(1).times(100).toFixed(6));
+  assert.equal(
+    r.xirrPct,
+    xirr([
+      ["2025-01-02", D(-101)],
+      ["2025-01-06", D(99)],
+    ])
+      .times(100)
+      .toFixed(6),
+  );
+});

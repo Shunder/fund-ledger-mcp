@@ -485,7 +485,10 @@ export function mcpServer(ctx) {
   });
   for (const t of tools) {
     const scope = t.write ? "portfolio:write" : "portfolio:read";
-    const schemes = [{ type: "oauth2", scopes: [scope] }];
+    const requiredScopes = t.write
+      ? ["portfolio:read", "portfolio:write"]
+      : ["portfolio:read"];
+    const schemes = [{ type: "oauth2", scopes: requiredScopes }];
     server.registerTool(
       t.name,
       {
@@ -507,14 +510,14 @@ export function mcpServer(ctx) {
         _meta: { securitySchemes: schemes },
       },
       async (args) => {
-        if (!ctx.scopes.includes(scope))
+        if (!requiredScopes.every((s) => ctx.scopes.includes(s)))
           return {
             isError: true,
             content: [{ type: "text", text: "权限不足 " + scope }],
             _meta: {
               "mcp/www_authenticate": [
                 'Bearer error="insufficient_scope", scope="' +
-                  scope +
+                  requiredScopes.join(" ") +
                   '", resource_metadata="' +
                   ctx.metadata +
                   '"',

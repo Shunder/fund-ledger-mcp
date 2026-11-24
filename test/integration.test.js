@@ -182,6 +182,11 @@ test("standard MCP client negotiates over TLS, lists annotations, validates writ
       assert.equal(t.inputSchema.type, "object");
       assert.ok(t.annotations);
       assert.ok(t._meta.securitySchemes);
+      if (!t.annotations.readOnlyHint)
+        assert.deepEqual(t._meta.securitySchemes[0].scopes, [
+          "portfolio:read",
+          "portfolio:write",
+        ]);
     }
     assert.equal(
       tools.find((t) => t.name === "confirm_changes").annotations

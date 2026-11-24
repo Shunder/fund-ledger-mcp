@@ -119,6 +119,8 @@ export function project(
           ? value.minus(startValue).minus(flow)
           : null;
       if (s.needsReconciliation) periodCovered = false;
+      if (before.gt(0) && !covered(s.code, prev?.day, day))
+        periodCovered = false;
       if (active && !covered(s.code, series.at(-1)?.day || day, day))
         periodCovered = false;
       if (activity.has(k) && !fresh && !openingKeys.has(k))
@@ -146,6 +148,8 @@ export function project(
         estimated: s.estimated,
         basis: s.basis,
         basisDay: s.basisDay ?? null,
+        reportedSnapshotValue: s.reportedSnapshotValue ?? null,
+        reportedSnapshotNav: s.reportedSnapshotNav ?? null,
         createdAt: s.createdAt,
         updatedAt: s.updatedAt,
         dailyProfit: money(profit),
@@ -244,6 +248,7 @@ export function project(
       value,
       flow,
       periodCovered,
+      firstDayFromTrades: day === start && openingKeys.size === 0,
       endValued:
         participating.every((i) => i.navDay === day) || !participating.length,
     });
@@ -310,21 +315,26 @@ export function performance(series, start, end) {
     last.value == null
   )
     return out;
-  const steps = window.filter((r) => r.day > base.day);
+  const fromFirstTrade = !prior && base.firstDayFromTrades;
+  const steps = fromFirstTrade
+    ? window
+    : window.filter((r) => r.day > base.day);
   if (steps.some((r) => !r.periodCovered || r.value == null || r.flow == null))
     return out;
   let wealth = D(1),
     peak = D(1),
     dd = D(0),
-    prev = base.value,
+    prev = fromFirstTrade ? D(0) : base.value,
     profit = D(0),
     linked = true;
-  const flows = [[base.day, base.value.neg()]];
+  const flows = [[base.day, prev.neg()]];
   for (const r of steps) {
     const gain = r.value.minus(prev).minus(r.flow);
     profit = profit.plus(gain);
-    if (prev.gt(0)) {
-      wealth = wealth.times(gain.div(prev).plus(1));
+    // When an empty account begins investing, its initial contribution funds the first fee.
+    const capital = prev.gt(0) ? prev : r.flow;
+    if (capital.gt(0)) {
+      wealth = wealth.times(gain.div(capital).plus(1));
       peak = DecimalMax(peak, wealth);
       dd = DecimalMax(dd, D(1).minus(wealth.div(peak)));
     } else if (!gain.isZero()) linked = false;
@@ -334,7 +344,11 @@ export function performance(series, start, end) {
   flows.push([end, last.value]);
   return {
     ...out,
-    status: prior ? "complete" : "since_first_observed_close",
+    status: prior
+      ? "complete"
+      : fromFirstTrade
+        ? "since_first_recorded_trade"
+        : "since_first_observed_close",
     profit: money(profit),
     twrPct: linked ? pct(wealth.minus(1)) : null,
     maxDrawdownPct: linked ? pct(dd) : null,

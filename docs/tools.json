@@ -2,7 +2,9 @@
   {
     "name": "search_funds",
     "description": "按代码、简称或拼音检索公开基金。重名时请用户选择确切代码。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -27,7 +29,9 @@
   {
     "name": "get_fund_info",
     "description": "公开基金档案、披露净值日期、基金类型及经理。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -50,7 +54,9 @@
   {
     "name": "get_fund_estimate",
     "description": "查询盘中估值，严禁用于已实现或正式每日收益。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -73,7 +79,9 @@
   {
     "name": "get_fund_nav_history",
     "description": "查询指定期间单位净值，最多 90 天。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -110,7 +118,9 @@
   {
     "name": "get_fund_nav",
     "description": "最近 90 天内最后一个披露的单位净值，附净值日期。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -133,7 +143,9 @@
   {
     "name": "get_fund_performance",
     "description": "基金公开业绩及指数比较，区别于个人投资收益。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -169,7 +181,9 @@
   {
     "name": "get_fund_stock_holdings",
     "description": "基金定期披露的重仓股。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -192,7 +206,9 @@
   {
     "name": "get_market_overview",
     "description": "沪深市场概览。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -207,7 +223,9 @@
   {
     "name": "get_stock_quote",
     "description": "查询指定市场指数/股票报价，证券 ID 取决于数据源覆盖。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -235,7 +253,10 @@
   {
     "name": "add_holding",
     "description": "新增一个平台的人民币基金期初快照。必须有基准日期。只记录真实持仓。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -333,7 +354,10 @@
   {
     "name": "record_transaction",
     "description": "记录已发生交易，幂等 ID 在重试和 pending 转 confirmed 时保持相同。申购 amount 含费，赎回 amount 为实收；转换 amount 为转出毛额。仅记账。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -467,7 +491,10 @@
   {
     "name": "preview_portfolio_changes",
     "description": "预览行级变化并签发十分钟确认凭据。向用户展示，获得同意后调用 confirm_changes。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -973,7 +1000,10 @@
   {
     "name": "update_holding",
     "description": "更正已有期初快照，先返回待确认的预览。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -1071,7 +1101,10 @@
   {
     "name": "import_holdings",
     "description": "预览 JSON 行数组或带表头的 CSV。确认后整批提交。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -1201,7 +1234,10 @@
   {
     "name": "delete_holding",
     "description": "预览删除指定平台基金的全部流水；实际清仓请记录赎回。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1231,7 +1267,10 @@
   {
     "name": "delete_transaction",
     "description": "预览移除错误流水，对剩余历史回放校验。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1254,7 +1293,10 @@
   {
     "name": "confirm_changes",
     "description": "仅在用户对预览明确同意后提交。匹配用户、版本和有效期。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": false,
     "destructiveHint": true,
@@ -1278,7 +1320,9 @@
   {
     "name": "get_portfolio",
     "description": "按平台返回全部持仓，附来源日期和估算依据。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1301,7 +1345,9 @@
   {
     "name": "get_holding",
     "description": "查询指定基金的分平台持仓与合并市值。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1337,7 +1383,9 @@
   {
     "name": "get_transactions",
     "description": "获取流水、状态及原始输入，按登记顺序分页。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1369,7 +1417,9 @@
   {
     "name": "export_portfolio",
     "description": "导出账户范围内结构化持仓和完整历史流水（JSON）。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1384,7 +1434,9 @@
   {
     "name": "get_daily_profit",
     "description": "指定净值日逐基金和组合收益。未知为 null；knownDailySubtotal 仅为已披露小计。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1407,7 +1459,9 @@
   {
     "name": "get_portfolio_summary",
     "description": "当前市值、已实现、未实现、累计收益及最近一周、本月、本年区间收益。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1430,7 +1484,9 @@
   {
     "name": "get_profit_history",
     "description": "返回净值/交易日期的资产曲线与收益，最多 366 天，保留缺失。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1462,7 +1518,9 @@
   {
     "name": "get_portfolio_performance",
     "description": "区间资金流调整收益及 TWR",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1494,7 +1552,9 @@
   {
     "name": "get_max_drawdown",
     "description": "区间净值化财富指数的最大回撤",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1526,7 +1586,9 @@
   {
     "name": "get_xirr",
     "description": "区间 XIRR（约定现金流有唯一根时）",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1558,7 +1620,9 @@
   {
     "name": "get_monthly_profit",
     "description": "指定日期所在月份，从月初到该日的收益。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1581,7 +1645,9 @@
   {
     "name": "get_yearly_profit",
     "description": "指定日期所在年份，从年初到该日的收益。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1604,7 +1670,9 @@
   {
     "name": "get_asset_allocation",
     "description": "按平台、基金代码或类别归集最新可得市值。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1636,7 +1704,10 @@
   {
     "name": "refresh_portfolio",
     "description": "同步披露单位净值并生成快照，可指定最多 366 天回补。",
-    "scope": "portfolio:write",
+    "scopes": [
+      "portfolio:read",
+      "portfolio:write"
+    ],
     "readOnlyHint": false,
     "openWorldHint": true,
     "destructiveHint": false,
@@ -1664,7 +1735,9 @@
   {
     "name": "get_data_status",
     "description": "用户所属净值同步状态、目标日期、基金代码与检查时间。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1679,7 +1752,9 @@
   {
     "name": "get_last_sync_time",
     "description": "用户所属净值同步状态、目标日期、基金代码与检查时间。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1694,7 +1769,9 @@
   {
     "name": "get_sync_errors",
     "description": "用户所属净值同步状态、目标日期、基金代码与检查时间。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1709,7 +1786,9 @@
   {
     "name": "search",
     "description": "在已认证用户持仓中检索基金代码、名称或平台，供检索型客户端使用。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,
@@ -1733,7 +1812,9 @@
   {
     "name": "fetch",
     "description": "获取当前用户名下一个基金文档，id 来自 search。",
-    "scope": "portfolio:read",
+    "scopes": [
+      "portfolio:read"
+    ],
     "readOnlyHint": true,
     "openWorldHint": false,
     "destructiveHint": false,

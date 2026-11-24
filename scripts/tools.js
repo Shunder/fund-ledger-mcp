@@ -5,12 +5,14 @@ console.log(
     catalog.map((t) => ({
       name: t.name,
       description: t.description,
-      scope: t.write ? "portfolio:write" : "portfolio:read",
+      scopes: t.write
+        ? ["portfolio:read", "portfolio:write"]
+        : ["portfolio:read"],
       readOnlyHint: !t.write,
       openWorldHint: t.open,
       destructiveHint: t.destructive,
       idempotentHint: t.idempotent,
-      inputSchema: z.toJSONSchema(t.schema, {target:"draft-7", io:"input"}),
+      inputSchema: z.toJSONSchema(t.schema, { target: "draft-7", io: "input" }),
     })),
     null,
     2,

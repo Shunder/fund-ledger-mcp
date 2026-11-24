@@ -185,7 +185,7 @@ export function appFor(
     const t = catalog.find((t) => t.name === req.params.name);
     if (!t) return res.sendStatus(404);
     if (t.write && !req.ledger.scopes.includes("portfolio:write"))
-      return challenge(res, 403, "portfolio:write");
+      return challenge(res, 403, "portfolio:read portfolio:write");
     try {
       return res.json({
         result: await t.run(req.ledger, t.schema.parse(req.body)),

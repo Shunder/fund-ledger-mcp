@@ -38,7 +38,10 @@ export function apply(s, e) {
   const q = D(e.shares || 0),
     a = D(e.amount || 0);
   for (const k of ["name", "category", "shareClass"]) if (e[k]) s[k] = e[k];
-  s.updatedAt = e.updatedAt;
+  if (e.updatedAt && (!s.updatedAt || e.updatedAt > s.updatedAt))
+    s.updatedAt = e.updatedAt;
+  if (e.createdAt && (!s.createdAt || e.createdAt < s.createdAt))
+    s.createdAt = e.createdAt;
   switch (e.kind) {
     case "opening":
       requireValue(!s.started, "期初快照必须是此平台与基金的首条确认记录");
@@ -47,6 +50,8 @@ export function apply(s, e) {
       s.estimated = e.estimated;
       s.basis = e.basis;
       s.basisDay = e.day;
+      s.reportedSnapshotValue = e.marketValue;
+      s.reportedSnapshotNav = e.snapshotNav;
       break;
     case "buy":
       s.shares = s.shares.plus(q);
