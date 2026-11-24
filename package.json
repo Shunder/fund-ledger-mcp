@@ -1,0 +1,59 @@
+{
+  "name": "personal-funds-mcp",
+  "version": "1.0.0",
+  "description": "Personal CNY fund ledger and authenticated remote MCP server",
+  "author": "smallke <smallkes@qq.com> (https://github.com/smallke)",
+  "homepage": "https://github.com/smallke",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "fund",
+    "stock",
+    "china",
+    "a-share",
+    "eastmoney",
+    "finance",
+    "investment",
+    "portfolio",
+    "net-value",
+    "capital-flow",
+    "northbound",
+    "free-api",
+    "no-api-key",
+    "基金",
+    "股票",
+    "A股",
+    "东方财富"
+  ],
+  "type": "module",
+  "bin": {
+    "cn-funds-mcp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js --http",
+    "stdio": "node src/index.js",
+    "migrate": "node src/migrate.js",
+    "sync": "node src/worker.js",
+    "test": "node --test test/*.test.js",
+    "tools": "node scripts/tools.js"
+  },
+  "dependencies": {
+    "@auth0/auth0-spa-js": "2.30.0",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "csv-parse": "7.0.3",
+    "decimal.js": "10.6.0",
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.5",
+    "jose": "6.2.18",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22.21"
+  },
+  "devDependencies": {
+    "undici": "7.30.2"
+  }
+}

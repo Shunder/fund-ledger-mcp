@@ -1,0 +1,29 @@
+databases:
+  - name: fund-ledger-db
+    plan: basic-256mb
+    databaseName: ledger
+    user: ledger
+    ipAllowList: []
+services:
+  - type: web
+    name: fund-ledger
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fund-ledger-db
+          property: connectionString
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: OAUTH_ISSUER
+        sync: false
+      - key: ALLOWED_SUBJECTS
+        sync: false
+      - key: WEB_CLIENT_ID
+        sync: false
+      - key: TZ
+        value: Asia/Shanghai
+      - key: SCHEDULER_ENABLED
+        value: "true"

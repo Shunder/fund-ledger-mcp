@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>基金账本 · 持仓管理</title><link rel="stylesheet" href="/assets/manage.css">
+<main><header><h1>基金账本</h1><button id="login">登录</button><button id="logout" hidden>退出</button></header>
+<p id="status" role="status"></p><section id="ledger" hidden>
+<h2>我的持仓</h2><button id="reload">刷新列表</button><div id="positions"></div>
+<h2>录入与更正</h2><label>操作<select id="action">
+<option value="add">新增期初持仓</option><option value="update">更正期初持仓</option><option value="record">记录或确认交易</option>
+<option value="import">批量导入 CSV</option><option value="delete_record">删除错误流水</option><option value="delete_holding">删除平台持仓与流水</option></select></label>
+<label id="payloadLabel" for="payload">输入数据</label><textarea id="payload" rows="12" spellcheck="false"></textarea>
+<button id="preview">预览修改</button><pre id="result"></pre><button id="confirm" hidden>确认提交以上修改</button>
+</section></main><script src="/assets/auth.js" defer></script><script src="/assets/manage.js" defer></script></html>
